@@ -23,12 +23,13 @@ fn test_vault_deposit_flow() {
 
     // Deploy standard token asset
     let token_admin = Address::generate(&env);
-    let token_admin_client = env.register_stellar_asset_contract_v2(token_admin.clone());
-    let token_contract_id = token_admin_client.address();
+    let token_contract = env.register_stellar_asset_contract_v2(token_admin.clone());
+    let token_contract_id = token_contract.address();
     let token_client = token::Client::new(&env, &token_contract_id);
+    let token_admin_client = token::StellarAssetClient::new(&env, &token_contract_id);
 
     // Mint tokens to user
-    token_admin_client.client().mint(&user, &1000);
+    token_admin_client.mint(&user, &1000);
 
     // Assert token balance before deposit
     assert_eq!(token_client.balance(&user), 1000);
