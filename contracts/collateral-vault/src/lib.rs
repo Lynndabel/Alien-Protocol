@@ -24,17 +24,23 @@ impl VaultContract {
         storage::set_oracle(&env, &oracle);
     }
 
-    pub fn set_admin(env: Env, new_admin: Address) {
-        let admin = storage::get_admin(&env).expect("not initialized");
-        admin.require_auth();
+    pub fn set_admin(env: Env, new_admin: Address) -> Result<(), VaultError> {
+        let current_admin = storage::get_admin(&env).ok_or(VaultError::InvalidInputs)?;
+        current_admin.require_auth();
+
+        if current_admin == new_admin {
+            return Err(VaultError::AlreadyAdmin);
+        }
 
         storage::set_admin(&env, &new_admin);
 
         events::AdminChanged {
-            old_admin: admin,
+            old_admin: current_admin,
             new_admin,
         }
         .publish(&env);
+
+        Ok(())
     }
 
     pub fn pause(env: Env) {
