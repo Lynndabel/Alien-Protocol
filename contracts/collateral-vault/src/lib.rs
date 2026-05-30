@@ -1,5 +1,5 @@
 #![no_std]
-use soroban_sdk::{contract, contractimpl, token, Address, Env};
+use soroban_sdk::{contract, contractimpl, token, Address, Env, Vec};
 
 use errors::VaultError;
 use types::{CollateralAsset, Position};
@@ -66,14 +66,7 @@ impl VaultContract {
     pub fn add_supported_asset(env: Env, asset: Address) {
         let admin = storage::get_admin(&env).expect("not initialized");
         admin.require_auth();
-
-        if storage::is_supported_asset(&env, &asset) {
-            soroban_sdk::panic_with_error!(&env, VaultError::AlreadySupported);
-        }
-
         storage::add_supported_asset(&env, &asset);
-
-        events::AssetAdded { asset }.publish(&env);
     }
 
     pub fn remove_supported_asset(env: Env, asset: Address) {
@@ -161,8 +154,46 @@ impl VaultContract {
         let new_balance = balance - amount;
         storage::set_position_balance(&env, &receiver, &asset, new_balance);
 
+        // If the user has no remaining balance across any asset, remove from index
+        let user_assets = storage::get_user_assets(&env, &receiver);
+        let has_balance = user_assets.iter().any(|a| {
+            storage::get_position_balance(&env, &receiver, &a) > 0
+        });
+        if !has_balance {
+            storage::remove_from_position_index(&env, &receiver);
+        }
+
         let token_client = token::Client::new(&env, &asset);
         token_client.transfer(&env.current_contract_address(), &receiver, &amount);
+    }
+
+    pub fn get_all_positions(env: Env) -> Vec<Position> {
+        let index = storage::get_position_index(&env);
+        let mut positions: Vec<Position> = Vec::new(&env);
+
+        for user in index.iter() {
+            let assets = storage::get_user_assets(&env, &user);
+            let mut collateral = Vec::new(&env);
+
+            for asset in assets.iter() {
+                let amount = storage::get_position_balance(&env, &user, &asset);
+                if amount > 0 {
+                    collateral.push_back(CollateralAsset {
+                        asset: asset.clone(),
+                        amount,
+                    });
+                }
+            }
+
+            if !collateral.is_empty() {
+                positions.push_back(Position {
+                    user: user.clone(),
+                    collateral,
+                });
+            }
+        }
+
+        positions
     }
 
     pub fn seize_collateral(_env: Env, _user: Address, _asset: Address, _amount: i128) {}

@@ -107,6 +107,20 @@ pub fn add_to_position_index(env: &Env, user: &Address) {
     }
 }
 
+/// Remove a user from the position index (called when their balance reaches zero).
+pub fn remove_from_position_index(env: &Env, user: &Address) {
+    let index = get_position_index(env);
+    let mut new_index: Vec<Address> = Vec::new(env);
+    for addr in index.iter() {
+        if &addr != user {
+            new_index.push_back(addr);
+        }
+    }
+    env.storage()
+        .persistent()
+        .set(&DataKey::PositionIndex, &new_index);
+}
+
 pub fn get_user_assets(env: &Env, user: &Address) -> Vec<Address> {
     env.storage()
         .persistent()
