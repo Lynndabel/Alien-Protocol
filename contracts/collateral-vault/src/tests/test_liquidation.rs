@@ -48,7 +48,8 @@ fn setup_env() -> (
 
 #[test]
 fn test_authorize_liquidation_success() {
-    let (_env, client, _admin, _user, _oracle, _token_id, _token_client, _token_admin) = setup_env();
+    let (_env, client, _admin, _user, _oracle, _token_id, _token_client, _token_admin) =
+        setup_env();
     let engine = Address::generate(&_env);
 
     client.authorize_liquidation(&engine);
