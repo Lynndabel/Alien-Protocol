@@ -77,6 +77,16 @@ pub fn set_oracle(env: &Env, oracle: &Address) {
     env.storage().persistent().set(&DataKey::Oracle, oracle);
 }
 
+pub fn get_lending_pool(env: &Env) -> Option<Address> {
+    env.storage().persistent().get(&DataKey::LendingPool)
+}
+
+pub fn set_lending_pool(env: &Env, lending_pool: &Address) {
+    env.storage()
+        .persistent()
+        .set(&DataKey::LendingPool, lending_pool);
+}
+
 pub fn get_position_balance(env: &Env, user: &Address, asset: &Address) -> i128 {
     env.storage()
         .persistent()

@@ -37,6 +37,15 @@ impl VaultContract {
         .publish(&env);
     }
 
+    pub fn set_lending_pool(env: Env, lending_pool: Address) {
+        let admin = storage::get_admin(&env).expect("not initialized");
+        admin.require_auth();
+
+        storage::set_lending_pool(&env, &lending_pool);
+
+        events::LendingPoolUpdated { lending_pool }.publish(&env);
+    }
+
     pub fn pause(env: Env) {
         let admin = storage::get_admin(&env).expect("not initialized");
         admin.require_auth();

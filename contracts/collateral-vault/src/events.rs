@@ -38,3 +38,9 @@ pub struct Paused {
 pub struct Unpaused {
     pub paused: bool,
 }
+
+#[contractevent]
+#[derive(Clone, Debug, PartialEq)]
+pub struct LendingPoolUpdated {
+    pub lending_pool: Address,
+}
