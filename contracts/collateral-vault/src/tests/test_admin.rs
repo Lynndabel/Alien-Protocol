@@ -246,6 +246,5 @@ fn test_set_admin_same_address() {
     let (_env, client, admin, _user, _token_id, _token_client, _token_admin) = setup_env();
 
     let result = client.try_set_admin(&admin);
-    assert_eq!(result, Err(Ok(VaultError::AlreadyAdmin.into())));
+    assert_eq!(result, Err(Ok(VaultError::AlreadyAdmin)));
 }
-
