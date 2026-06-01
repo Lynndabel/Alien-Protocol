@@ -261,3 +261,58 @@ fn test_get_price_after_update() {
     assert_eq!(updated_data.price, updated_price);
     assert_eq!(updated_data.timestamp, updated_timestamp);
 }
+
+// ── Issue #511: get_admin ─────────────────────────────────────────────────────
+
+#[test]
+fn test_get_admin_returns_correct_address_after_init() {
+    let (_env, client, admin) = setup_env();
+
+    let result = client.get_admin();
+    assert!(result.is_some());
+    assert_eq!(result.unwrap(), admin);
+}
+
+#[test]
+fn test_get_admin_returns_none_before_init() {
+    let env = Env::default();
+    let contract_id = env.register(OracleContract, ());
+    let client = OracleContractClient::new(&env, &contract_id);
+
+    let result = client.get_admin();
+    assert!(result.is_none());
+}
+
+#[test]
+fn test_get_admin_does_not_mutate_state() {
+    let (_env, client, admin) = setup_env();
+
+    let result1 = client.get_admin();
+    let result2 = client.get_admin();
+
+    assert_eq!(result1, result2);
+    assert_eq!(result1.unwrap(), admin);
+}
+
+#[test]
+fn test_get_admin_returns_updated_admin_after_set_admin() {
+    let (env, client, _old_admin) = setup_env();
+
+    let new_admin = Address::generate(&env);
+    client.set_admin(&new_admin);
+
+    let result = client.get_admin();
+    assert!(result.is_some());
+    assert_eq!(result.unwrap(), new_admin);
+}
+
+#[test]
+fn test_get_admin_requires_no_auth() {
+    let (env, client, admin) = setup_env();
+
+    // Call get_admin without any mock auth — should succeed as a public read
+    env.set_auths(&[]);
+    let result = client.get_admin();
+    assert!(result.is_some());
+    assert_eq!(result.unwrap(), admin);
+}
