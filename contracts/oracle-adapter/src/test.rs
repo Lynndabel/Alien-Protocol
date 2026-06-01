@@ -29,7 +29,7 @@ fn test_initialize_success() {
     env.mock_all_auths();
     let asset = Address::generate(&env);
     client.set_price(&asset, &100, &1000);
-    
+
     let price_data = client.get_price(&asset).unwrap();
     assert_eq!(price_data.price, 100);
     assert_eq!(price_data.timestamp, 1000);
