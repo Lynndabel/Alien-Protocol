@@ -56,7 +56,10 @@ impl OracleContract {
             None => return false,
         };
         let ledger_time = env.ledger().timestamp();
-        ledger_time - price_data.timestamp <= threshold
+        match ledger_time.checked_sub(price_data.timestamp) {
+            Some(delta) => delta <= threshold,
+            None => false,
+        }
     }
 
     pub fn set_price(env: Env, asset: Address, price: i128, timestamp: u64) {
