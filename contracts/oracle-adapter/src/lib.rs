@@ -16,6 +16,8 @@ pub struct OracleContract;
 
 #[contractimpl]
 impl OracleContract {
+    /// Initializes the oracle contract with the given admin address.
+    /// Can only be called once. Requires auth from the admin address.
     pub fn initialize(env: Env, admin: Address) {
         if storage::get_admin(&env).is_some() {
             panic!("already initialized");
@@ -24,10 +26,15 @@ impl OracleContract {
         storage::set_admin(&env, &admin);
     }
 
+    /// Returns the stored price data for the given asset, if any.
     pub fn get_price(env: Env, asset: Address) -> Option<PriceData> {
         storage::get_price(&env, &asset)
     }
 
+    /// Sets the price for a given asset.
+    /// Only callable by the stored admin.
+    /// Panics if price <= 0, timestamp <= 0, or contract is not initialized.
+    /// Emits a PriceUpdated event on success.
     pub fn set_price(env: Env, asset: Address, price: i128, timestamp: u64) {
         let admin = storage::get_admin(&env).expect("not initialized");
         admin.require_auth();
