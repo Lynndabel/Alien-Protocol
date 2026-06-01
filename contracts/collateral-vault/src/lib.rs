@@ -258,8 +258,7 @@ impl VaultContract {
         storage::set_position_balance(&env, &user, &asset, new_balance);
 
         // If the user has no remaining balance across any asset, remove from index
-        let position = storage::get_position(&env, &user);
-        if position.collateral.is_empty() {
+        if storage::get_position(&env, &user).is_none() {
             storage::remove_from_position_index(&env, &user);
         }
 
