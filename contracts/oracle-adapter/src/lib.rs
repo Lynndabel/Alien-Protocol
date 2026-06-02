@@ -27,8 +27,6 @@ pub struct OracleContract;
 
 #[contractimpl]
 impl OracleContract {
-    /// One-time setup: store admin and staleness threshold, emit Initialized event.
-    /// Panics with "AlreadyInitialized" if called more than once.
     pub fn initialize(env: Env, admin: Address, staleness_threshold: u64) {
         if storage::is_initialized(&env) {
             panic!("AlreadyInitialized");
@@ -63,10 +61,24 @@ impl OracleContract {
     }
 
     pub fn set_price(env: Env, asset: Address, price: i128, timestamp: u64) {
-        let caller = storage::get_admin(&env).expect("NotInitialized");
+        let caller = match storage::get_admin(&env) {
+            Some(addr) => addr,
+            None => soroban_sdk::panic_with_error!(&env, OracleError::NotInitialized),
+        };
         caller.require_auth();
+
+        assert!(price > 0, "price must be positive");
+        assert!(timestamp > 0, "timestamp must be positive");
+
         let data = PriceData { price, timestamp };
         storage::set_price(&env, &asset, &data);
+
+        events::PriceUpdated {
+            asset,
+            price,
+            timestamp,
+        }
+        .publish(&env);
     }
 
     pub fn get_admin(env: Env) -> Option<Address> {

@@ -157,7 +157,62 @@ fn test_get_price_is_public_and_unauthorized() {
     assert!(price_opt.is_some());
 }
 
-// --- Upstream queries tests integrated with authorization and setup ---
+#[test]
+fn test_set_price_zero_price_fails() {
+    let (_env, client, _admin) = setup_env();
+    let asset = Address::generate(&_env);
+
+    let result = client.try_set_price(&asset, &0_i128, &100_000_u64);
+    assert!(result.is_err());
+}
+
+#[test]
+fn test_set_price_negative_price_fails() {
+    let (_env, client, _admin) = setup_env();
+    let asset = Address::generate(&_env);
+
+    let result = client.try_set_price(&asset, &(-100_i128), &100_000_u64);
+    assert!(result.is_err());
+}
+
+#[test]
+fn test_set_price_zero_timestamp_fails() {
+    let (_env, client, _admin) = setup_env();
+    let asset = Address::generate(&_env);
+
+    let result = client.try_set_price(&asset, &1000_i128, &0_u64);
+    assert!(result.is_err());
+}
+
+#[test]
+fn test_set_price_emits_event() {
+    let (env, client, _admin) = setup_env();
+    let asset = Address::generate(&env);
+
+    client.set_price(&asset, &1000_i128, &100_000_u64);
+
+    let last_event = env.events().all().last().unwrap();
+    assert_eq!(last_event.0, client.address);
+
+    let event_symbol = Symbol::try_from_val(&env, &last_event.1.get(0).unwrap()).unwrap();
+    assert_eq!(event_symbol, Symbol::new(&env, "price_updated"));
+}
+
+#[test]
+fn test_set_price_different_assets() {
+    let (_env, client, _admin) = setup_env();
+    let asset1 = Address::generate(&_env);
+    let asset2 = Address::generate(&_env);
+
+    client.set_price(&asset1, &1000_i128, &100_000_u64);
+    client.set_price(&asset2, &2000_i128, &200_000_u64);
+
+    let price1 = client.get_price(&asset1).unwrap();
+    assert_eq!(price1.price, 1000);
+
+    let price2 = client.get_price(&asset2).unwrap();
+    assert_eq!(price2.price, 2000);
+}
 
 #[test]
 fn test_get_price_returns_correct_data() {
@@ -276,7 +331,20 @@ fn test_is_price_fresh_within_threshold() {
     let env = _env;
     let asset = Address::generate(&env);
 
-    client.set_price(&asset, &100, &0);
+    env.ledger().set_timestamp(200);
+    client.set_price(&asset, &100, &100);
+
+    assert!(client.is_price_fresh(&asset));
+}
+
+#[test]
+fn test_is_price_fresh_at_exact_threshold() {
+    let (_env, client, _admin) = setup_env();
+    let env = _env;
+    let asset = Address::generate(&env);
+
+    env.ledger().set_timestamp(400);
+    client.set_price(&asset, &100, &100);
 
     assert!(client.is_price_fresh(&asset));
 }
@@ -287,24 +355,12 @@ fn test_is_price_fresh_stale() {
     let env = _env;
     let asset = Address::generate(&env);
 
-    client.set_price(&asset, &100, &0);
+    env.ledger().set_timestamp(400);
+    client.set_price(&asset, &100, &100);
 
-    env.ledger().set_timestamp(301);
+    env.ledger().set_timestamp(401);
 
     assert!(!client.is_price_fresh(&asset));
-}
-
-#[test]
-fn test_is_price_fresh_at_exact_threshold() {
-    let (_env, client, _admin) = setup_env();
-    let env = _env;
-    let asset = Address::generate(&env);
-
-    client.set_price(&asset, &100, &0);
-
-    env.ledger().set_timestamp(300);
-
-    assert!(client.is_price_fresh(&asset));
 }
 
 #[test]
