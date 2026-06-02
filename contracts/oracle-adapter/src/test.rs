@@ -2,7 +2,7 @@
 
 use super::*;
 use soroban_sdk::testutils::{Address as _, Events, Ledger as _};
-use soroban_sdk::{Address, Env, Symbol};
+use soroban_sdk::{Address, Env, Symbol, TryFromVal};
 
 fn setup_env() -> (Env, OracleContractClient<'static>, Address) {
     let env = Env::default();
@@ -93,7 +93,6 @@ fn test_set_admin_emits_event() {
 
     let last_event = env.events().all().last().unwrap();
     assert_eq!(last_event.0, client.address);
-    use soroban_sdk::TryFromVal;
     let event_symbol = Symbol::try_from_val(&env, &last_event.1.get(0).unwrap()).unwrap();
     assert_eq!(event_symbol, Symbol::new(&env, "admin_changed"));
 }
