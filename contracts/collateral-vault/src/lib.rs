@@ -183,11 +183,6 @@ impl VaultContract {
             soroban_sdk::panic_with_error!(&env, VaultError::UnsupportedAsset);
         }
 
-        // Ensure the user has a position (at least one non-zero balance)
-        if storage::get_position(&env, &user).is_none() {
-            soroban_sdk::panic_with_error!(&env, VaultError::NoPosition);
-        }
-
         let token_client = token::Client::new(&env, &asset);
         token_client.transfer(&user, env.current_contract_address(), &amount);
 
@@ -221,6 +216,10 @@ impl VaultContract {
 
         if !storage::is_supported_asset(&env, &asset) {
             soroban_sdk::panic_with_error!(&env, VaultError::UnsupportedAsset);
+        }
+
+        if storage::get_position(&env, &user).is_none() {
+            soroban_sdk::panic_with_error!(&env, VaultError::NoPosition);
         }
 
         let balance = storage::get_position_balance(&env, &user, &asset);
