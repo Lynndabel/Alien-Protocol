@@ -58,6 +58,7 @@ fn setup_env() -> (
     let user = Address::generate(&env);
 
     client.initialize(&admin, &oracle_id);
+    client.set_oracle(&oracle_id);
 
     let token_admin = Address::generate(&env);
     let token_contract = env.register_stellar_asset_contract_v2(token_admin);

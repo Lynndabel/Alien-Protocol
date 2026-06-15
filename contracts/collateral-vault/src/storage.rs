@@ -1,6 +1,14 @@
 use crate::types::{CollateralAsset, DataKey, Position};
 use soroban_sdk::{Address, Env, Vec};
 
+/// Check if the contract has been initialized (deployment/initialization shield)
+pub fn has_admin(env: &Env) -> bool {
+    env.storage()
+        .persistent()
+        .get::<_, Address>(&DataKey::Admin)
+        .is_some()
+}
+
 pub fn get_admin(env: &Env) -> Option<Address> {
     env.storage().persistent().get(&DataKey::Admin)
 }
@@ -18,6 +26,16 @@ pub fn is_paused(env: &Env) -> bool {
 
 pub fn set_paused(env: &Env, paused: bool) {
     env.storage().persistent().set(&DataKey::Paused, &paused);
+}
+
+pub fn _get_lending_pool(env: &Env) -> Option<Address> {
+    env.storage().persistent().get(&DataKey::LendingPool)
+}
+
+pub fn set_lending_pool(env: &Env, lending_pool: &Address) {
+    env.storage()
+        .persistent()
+        .set(&DataKey::LendingPool, lending_pool);
 }
 
 pub fn is_supported_asset(env: &Env, asset: &Address) -> bool {
@@ -93,10 +111,6 @@ pub fn get_pool(env: &Env) -> Option<Address> {
 
 pub fn set_pool(env: &Env, pool: &Address) {
     env.storage().persistent().set(&DataKey::Pool, pool);
-}
-
-pub fn set_lending_pool(env: &Env, lending_pool: &Address) {
-    env.storage().persistent().set(&DataKey::Pool, lending_pool);
 }
 
 pub fn get_position_balance(env: &Env, user: &Address, asset: &Address) -> i128 {
