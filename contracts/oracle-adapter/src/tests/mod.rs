@@ -373,7 +373,7 @@ fn test_is_price_fresh_uninitialized_contract() {
     assert!(!client.is_price_fresh(&asset));
 }
 
-// ── Issue #511: get_admin ─────────────────────────────────────────────────────
+// ─── Issue #511: get_admin ─────────────────────────────────────────────────────
 
 #[test]
 fn test_get_admin_returns_correct_address_after_init() {
@@ -428,4 +428,3 @@ fn test_get_admin_requires_no_auth() {
 }
 
 mod test_pause;
-
