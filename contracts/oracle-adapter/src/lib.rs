@@ -72,12 +72,19 @@ impl OracleContract {
         }
     }
 
-    pub fn set_price(env: Env, asset: Address, price: i128, timestamp: u64) {
+    pub fn set_price(env: Env, caller: Address, asset: Address, price: i128, timestamp: u64) {
         let admin = match storage::get_admin(&env) {
             Some(addr) => addr,
             None => soroban_sdk::panic_with_error!(&env, OracleError::NotInitialized),
         };
-        admin.require_auth();
+        let is_admin = caller == admin;
+        let is_authorized_feeder = storage::is_authorized_feeder(&env, &caller);
+
+        if is_admin || is_authorized_feeder {
+            caller.require_auth();
+        } else {
+            soroban_sdk::panic_with_error!(&env, OracleError::Unauthorized);
+        }
 
         if storage::is_paused(&env) {
             soroban_sdk::panic_with_error!(&env, OracleError::OraclePaused);
