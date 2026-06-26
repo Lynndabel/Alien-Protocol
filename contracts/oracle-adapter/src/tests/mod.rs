@@ -1,2 +1,2 @@
-pub mod test_price;
 mod test_pause;
+pub mod test_price;
