@@ -14,3 +14,15 @@ pub struct PriceUpdated {
     pub price: i128,
     pub timestamp: u64,
 }
+
+#[contractevent]
+#[derive(Clone, Debug, PartialEq)]
+pub struct Paused {
+    pub by: Address,
+}
+
+#[contractevent]
+#[derive(Clone, Debug, PartialEq)]
+pub struct Unpaused {
+    pub paused: bool,
+}

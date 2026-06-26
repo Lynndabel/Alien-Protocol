@@ -4,7 +4,7 @@ use super::*;
 use soroban_sdk::testutils::{Address as _, Events, Ledger as _};
 use soroban_sdk::{Address, Env, Symbol, TryFromVal};
 
-fn setup_env() -> (Env, OracleContractClient<'static>, Address) {
+pub(crate) fn setup_env() -> (Env, OracleContractClient<'static>, Address) {
     let env = Env::default();
     env.mock_all_auths();
 
@@ -373,7 +373,7 @@ fn test_is_price_fresh_uninitialized_contract() {
     assert!(!client.is_price_fresh(&asset));
 }
 
-// ── Issue #511: get_admin ─────────────────────────────────────────────────────
+// ─── Issue #511: get_admin ─────────────────────────────────────────────────────
 
 #[test]
 fn test_get_admin_returns_correct_address_after_init() {
@@ -426,3 +426,5 @@ fn test_get_admin_requires_no_auth() {
     assert!(result.is_some());
     assert_eq!(result.unwrap(), admin);
 }
+
+mod test_pause;

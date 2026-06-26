@@ -7,6 +7,8 @@ use soroban_sdk::{contract, contracterror, contractevent, contractimpl, Address,
 pub enum OracleError {
     NotInitialized = 1,
     AlreadyAdmin = 2,
+    OraclePaused = 3,
+    AlreadyPaused = 4,
 }
 
 #[contractevent]
@@ -33,6 +35,7 @@ impl OracleContract {
         }
         storage::set_admin(&env, &admin);
         storage::set_staleness_threshold(&env, staleness_threshold);
+        storage::set_paused(&env, false);
         events::Initialized {
             admin,
             staleness_threshold,
@@ -66,6 +69,10 @@ impl OracleContract {
             None => soroban_sdk::panic_with_error!(&env, OracleError::NotInitialized),
         };
         caller.require_auth();
+
+        if storage::is_paused(&env) {
+            soroban_sdk::panic_with_error!(&env, OracleError::OraclePaused);
+        }
 
         assert!(price > 0, "price must be positive");
         assert!(timestamp > 0, "timestamp must be positive");
@@ -108,6 +115,37 @@ impl OracleContract {
         }
         .publish(&env);
     }
+
+    pub fn pause(env: Env) {
+        let admin = match storage::get_admin(&env) {
+            Some(addr) => addr,
+            None => soroban_sdk::panic_with_error!(&env, OracleError::NotInitialized),
+        };
+        admin.require_auth();
+
+        if storage::is_paused(&env) {
+            soroban_sdk::panic_with_error!(&env, OracleError::AlreadyPaused);
+        }
+
+        storage::set_paused(&env, true);
+        events::Paused { by: admin }.publish(&env);
+    }
+
+    pub fn unpause(env: Env) {
+        let admin = match storage::get_admin(&env) {
+            Some(addr) => addr,
+            None => soroban_sdk::panic_with_error!(&env, OracleError::NotInitialized),
+        };
+        admin.require_auth();
+
+        if !storage::is_paused(&env) {
+            panic!("oracle is not paused");
+        }
+
+        storage::set_paused(&env, false);
+        events::Unpaused { paused: false }.publish(&env);
+    }
 }
 
-mod test;
+#[cfg(test)]
+mod tests;
