@@ -3,7 +3,7 @@
 use crate::tests::setup_env;
 use crate::{OracleContract, OracleContractClient, OracleError};
 use soroban_sdk::{
-    testutils::{Address as _, Events, Ledger as _},
+    testutils::{Address as _, Events},
     Address, Env, Symbol, TryFromVal,
 };
 
