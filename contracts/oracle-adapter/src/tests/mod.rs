@@ -42,7 +42,6 @@ fn test_initialize_twice_fails() {
     client.initialize(&admin, &300);
 }
 
-
 #[test]
 fn test_set_price_success() {
     let (env, client, admin) = setup_env();
@@ -74,7 +73,6 @@ fn test_set_price_non_admin_fails() {
     let (auth_addr, _) = auths.first().unwrap();
     assert_eq!(*auth_addr, admin);
 }
-
 
 #[test]
 fn test_get_price_is_public_and_unauthorized() {
@@ -303,7 +301,6 @@ fn test_is_price_fresh_uninitialized_contract() {
     assert!(!client.is_price_fresh(&asset));
 }
 
-
 #[test]
 fn test_get_admin_does_not_mutate_state() {
     let (_env, client, admin) = setup_env();
@@ -337,6 +334,6 @@ fn test_get_admin_requires_no_auth() {
     assert_eq!(result.unwrap(), admin);
 }
 
+pub mod test_admin;
 mod test_pause;
 pub mod test_price;
-pub mod test_admin;

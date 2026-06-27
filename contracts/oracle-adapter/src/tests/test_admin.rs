@@ -1,8 +1,11 @@
 #![cfg(test)]
 
-use crate::{OracleContract, OracleContractClient, OracleError};
-use soroban_sdk::{testutils::{Address as _, Events, Ledger as _}, Address, Env, Symbol, TryFromVal};
 use crate::tests::setup_env;
+use crate::{OracleContract, OracleContractClient, OracleError};
+use soroban_sdk::{
+    testutils::{Address as _, Events, Ledger as _},
+    Address, Env, Symbol, TryFromVal,
+};
 
 #[test]
 fn test_set_admin_success() {
