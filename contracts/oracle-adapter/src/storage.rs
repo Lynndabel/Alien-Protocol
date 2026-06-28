@@ -46,3 +46,22 @@ pub fn is_paused(env: &Env) -> bool {
 pub fn set_paused(env: &Env, paused: bool) {
     env.storage().instance().set(&DataKey::Paused, &paused);
 }
+
+pub fn has_authorized_feeder(env: &Env, feeder: &Address) -> bool {
+    env.storage()
+        .persistent()
+        .has(&DataKey::AuthorizedFeeder(feeder.clone()))
+}
+
+pub fn remove_authorized_feeder(env: &Env, feeder: &Address) {
+    env.storage()
+        .persistent()
+        .remove(&DataKey::AuthorizedFeeder(feeder.clone()));
+}
+
+pub fn is_authorized_feeder(env: &Env, feeder: &Address) -> bool {
+    env.storage()
+        .persistent()
+        .get(&DataKey::AuthorizedFeeder(feeder.clone()))
+        .unwrap_or(false)
+}

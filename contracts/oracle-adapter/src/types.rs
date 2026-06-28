@@ -15,4 +15,5 @@ pub enum DataKey {
     Admin,
     StalenessThreshold,
     Paused,
+    AuthorizedFeeder(Address),
 }

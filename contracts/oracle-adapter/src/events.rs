@@ -24,5 +24,11 @@ pub struct Paused {
 #[contractevent]
 #[derive(Clone, Debug, PartialEq)]
 pub struct Unpaused {
-    pub paused: bool,
+    pub by: Address,
+}
+
+#[contractevent]
+#[derive(Clone, Debug, PartialEq)]
+pub struct FeederRemoved {
+    pub feeder: Address,
 }

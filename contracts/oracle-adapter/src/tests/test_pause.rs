@@ -82,10 +82,15 @@ fn test_unpause_non_admin_fails() {
 }
 
 #[test]
-#[should_panic(expected = "oracle is not paused")]
 fn test_unpause_when_not_paused_fails() {
     let (_env, client, _admin) = setup_env();
-    client.unpause();
+    let result = client.try_unpause();
+    assert!(result.is_err());
+    let err = result.err().unwrap().unwrap();
+    assert_eq!(
+        err,
+        soroban_sdk::Error::from_contract_error(OracleError::NotPaused as u32)
+    );
 }
 
 #[test]
