@@ -1,5 +1,3 @@
-#![cfg(test)]
-
 use super::*;
 use soroban_sdk::testutils::{Address as _, Events, Ledger as _};
 use soroban_sdk::{Address, Env, Symbol, TryFromVal};
